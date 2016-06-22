@@ -1,6 +1,6 @@
 image_width: 240
 image_height: 180
-camera_name: DAVIS-8401000
+camera_name: DAVIS-84010004
 camera_matrix:
   rows: 3
   cols: 3
