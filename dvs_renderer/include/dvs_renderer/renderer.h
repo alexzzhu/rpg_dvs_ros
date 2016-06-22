@@ -51,13 +51,14 @@ private:
 
   bool got_camera_info_;
   cv::Mat camera_matrix_, dist_coeffs_;
-
+  sensor_msgs::CameraInfo cam_info;
+  
   ros::Subscriber event_sub_;
   ros::Subscriber camera_info_sub_;
 
-  image_transport::Publisher image_pub_;
+  image_transport::CameraPublisher image_pub_;
   image_transport::Publisher undistorted_image_pub_;
-
+  
   image_transport::Subscriber image_sub_;
   cv::Mat last_image_;
   bool used_last_image_;

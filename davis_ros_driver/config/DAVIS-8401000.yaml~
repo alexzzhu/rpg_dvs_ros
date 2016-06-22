@@ -1,0 +1,20 @@
+image_width: 240
+image_height: 180
+camera_name: DAVIS-8401000
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [248.5138,-0.1577,127.7068,0.0,248.2189,88.0774,0.0,0.0,1.0000]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0,0,0,0,0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [9.99162924e-01,1.86942621e-03,-4.08651017e-02,-1.83030103e-03,9.99997830e-01,9.94815213e-04,4.08668728e-02,-9.19187040e-04,9.99164178e-01]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [215.77676928,0.,135.85798454,-20.25362429,0.,215.77676928,96.23883152,0.,0.,0.,1.,0.]

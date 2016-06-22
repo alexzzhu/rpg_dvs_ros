@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   camera_info_manager
   nodelet
+  image_transport
 )
 
 generate_dynamic_reconfigure_options(

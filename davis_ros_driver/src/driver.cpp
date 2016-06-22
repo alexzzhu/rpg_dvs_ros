@@ -33,18 +33,21 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
     nh_(nh),
     parameter_update_required_(false),
     parameter_bias_update_required_(false),
-    imu_calibration_running_(false)
+    imu_calibration_running_(false),
+    it(nh)
 {
 
   // load parameters
-  std::string dvs_serial_number;
+  //std::string dvs_serial_number;
   nh_private.param<std::string>("serial_number", dvs_serial_number, "");
   bool master;
   nh_private.param<bool>("master", master, true);
   double reset_timestamps_delay;
   nh_private.param<double>("reset_timestamps_delay", reset_timestamps_delay, -1.0);
   nh_private.param<int>("imu_calibration_sample_size", imu_calibration_sample_size_, 1000);
-
+  nh_private.param<std::string>("cam_info_url", cam_info_url, "");
+  
+  
   // initialize bias
   bias.linear_acceleration.x = 0.0;
   bias.linear_acceleration.y = 0.0;
@@ -59,18 +62,19 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   if (ns == "/")
     ns = "/dvs";
 
-  event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>(ns + "/events", 10);
-  camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>(ns + "/camera_info", 1);
-  imu_pub_ = nh_.advertise<sensor_msgs::Imu>(ns + "/imu", 10);
-  image_pub_ = nh_.advertise<sensor_msgs::Image>(ns + "/image_raw", 1);
+  event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>("dvs/events", 10);
+  camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("dvs/camera_info", 1);
+  imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu", 10);
+  //image_pub_ = nh_.advertise<sensor_msgs::Image>(ns + "/image_raw", 1);
+  cam_pub = it.advertiseCamera("image_raw", 1);
 
   caerConnect();
   current_config_.streaming_rate = 30;
   delta_ = boost::posix_time::microseconds(1e6/current_config_.streaming_rate);
 
-  reset_sub_ = nh_.subscribe((ns + "/reset_timestamps").c_str(), 1, &DavisRosDriver::resetTimestampsCallback, this);
-  imu_calibration_sub_ = nh_.subscribe((ns + "/calibrate_imu").c_str(), 1, &DavisRosDriver::imuCalibrationCallback, this);
-  snapshot_sub_ = nh_.subscribe((ns + "/trigger_snapshot").c_str(), 1, &DavisRosDriver::snapshotCallback, this);
+  reset_sub_ = nh_.subscribe("reset_timestamps", 1, &DavisRosDriver::resetTimestampsCallback, this);
+  imu_calibration_sub_ = nh_.subscribe("calibrate_imu", 1, &DavisRosDriver::imuCalibrationCallback, this);
+  snapshot_sub_ = nh_.subscribe("trigger_snapshot", 1, &DavisRosDriver::snapshotCallback, this);
 
   // Dynamic reconfigure
   dynamic_reconfigure_callback_ = boost::bind(&DavisRosDriver::callback, this, _1, _2);
@@ -107,7 +111,7 @@ void DavisRosDriver::caerConnect()
   while (!dvs_running)
   {
     //driver_ = new dvs::DvsDriver(dvs_serial_number, master);
-    davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX2, 0, 0, NULL);
+    davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX2, 0, 0, (char*)dvs_serial_number.c_str());
 
     //dvs_running = driver_->isDeviceRunning();
     dvs_running = !(davis_handle_ == NULL);
@@ -146,8 +150,8 @@ void DavisRosDriver::caerConnect()
     delete camera_info_manager_;
   }
 
-  camera_info_manager_ = new camera_info_manager::CameraInfoManager(nh_ns, device_id_);
-
+  camera_info_manager_ = new camera_info_manager::CameraInfoManager(nh_ns, device_id_, cam_info_url);
+  
   // initialize timestamps
   resetTimestamps();
   reset_time_ = ros::Time::now();
@@ -411,6 +415,7 @@ void DavisRosDriver::readout()
           if (camera_info_manager_->isCalibrated())
           {
             sensor_msgs::CameraInfoPtr camera_info_msg(new sensor_msgs::CameraInfo(camera_info_manager_->getCameraInfo()));
+            camera_info_msg->header.stamp = ros::Time::now();
             camera_info_pub_.publish(camera_info_msg);
           }
         }
@@ -500,10 +505,14 @@ void DavisRosDriver::readout()
             }
           }
 
+          ros::Time stamp = reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
+          
           // time
-          msg.header.stamp = reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
-
-          image_pub_.publish(msg);
+          msg.header.stamp = stamp;//reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
+          sensor_msgs::CameraInfoPtr camera_info_msg(new sensor_msgs::CameraInfo(camera_info_manager_->getCameraInfo()));
+          camera_info_msg->header.stamp = stamp;//ros::Time::now();
+          //image_pub_.publish(msg);
+          cam_pub.publish(msg, *camera_info_msg);
         }
       }
 

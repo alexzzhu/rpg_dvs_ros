@@ -86,7 +86,7 @@ void CameraDvsCalibration::calibrate()
   double reproj_error = cv::stereoCalibrate(object_points_, image_points_camera_, image_points_dvs_,
                                             camera_matrix_camera, dist_coeffs_camera, camera_matrix_dvs, dist_coeffs_dvs,
                                             cv::Size(standard_camera_info_.width, standard_camera_info_.height),
-                                            R, T, E, F, term_crit, flags);
+                                            R, T, E, F, flags, term_crit);
 
   cv::Mat R1, R2, P1, P2, Q;
   cv::stereoRectify(camera_matrix_camera, dist_coeffs_camera, camera_matrix_dvs, dist_coeffs_dvs,

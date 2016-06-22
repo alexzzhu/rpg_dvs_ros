@@ -17,6 +17,7 @@
 
 #include <ros/ros.h>
 #include <string>
+#include <image_transport/image_transport.h>
 
 // boost
 #include <boost/thread.hpp>
@@ -59,12 +60,15 @@ private:
   void caerConnect();
 
   ros::NodeHandle nh_;
+  image_transport::ImageTransport it;
   ros::Publisher event_array_pub_;
+  image_transport::CameraPublisher cam_pub;
   ros::Publisher camera_info_pub_;
   ros::Publisher imu_pub_;
-  ros::Publisher image_pub_;
+  //ros::Publisher image_pub_;
   caerDeviceHandle davis_handle_;
-  
+
+  std::string cam_info_url;
   std::string ns;
 
   volatile bool running_;
@@ -99,6 +103,7 @@ private:
 
   struct caer_davis_info davis_info_;
   std::string device_id_;
+  std::string dvs_serial_number;
 
   ros::Time reset_time_;
 

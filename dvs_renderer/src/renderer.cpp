@@ -34,8 +34,8 @@ Renderer::Renderer(ros::NodeHandle & nh, ros::NodeHandle nh_private) : nh_(nh),
 
   image_transport::ImageTransport it_(nh_);
   image_sub_ = it_.subscribe("image", 1, &Renderer::imageCallback, this);
-  image_pub_ = it_.advertise("dvs_rendering", 1);
-  undistorted_image_pub_ = it_.advertise("dvs_undistorted", 1);
+  image_pub_ = it_.advertiseCamera("dvs_rendering", 1);
+  //undistorted_image_pub_ = it_.advertise("dvs_undistorted", 1);
 
   for (int i = 0; i < 2; ++i)
     for (int k = 0; k < 2; ++k)
@@ -53,13 +53,13 @@ Renderer::Renderer(ros::NodeHandle & nh, ros::NodeHandle nh_private) : nh_(nh),
 Renderer::~Renderer()
 {
   image_pub_.shutdown();
-  undistorted_image_pub_.shutdown();
+  //undistorted_image_pub_.shutdown();
 }
 
 void Renderer::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg)
 {
   got_camera_info_ = true;
-
+  cam_info = *msg;
   camera_matrix_ = cv::Mat(3, 3, CV_64F);
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
@@ -95,7 +95,13 @@ void Renderer::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
     last_image_.copyTo(cv_image.image);
     cv_image.encoding = "bgr8";
     std::cout << "publish image from callback" << std::endl;
-    image_pub_.publish(cv_image.toImageMsg());
+    if (got_camera_info_){
+      sensor_msgs::Image img = *cv_image.toImageMsg();
+      ros::Time stamp = ros::Time::now();
+      img.header.stamp = stamp;
+      cam_info.header.stamp = stamp;
+      image_pub_.publish(img, cam_info);
+    }
   }
   used_last_image_ = false;
 }
@@ -171,9 +177,15 @@ void Renderer::eventsCallback(const dvs_msgs::EventArray::ConstPtr& msg)
       cv_image.image += on_events;
       cv_image.image -= off_events;
     }
+    if (got_camera_info_){
+      sensor_msgs::Image img = *cv_image.toImageMsg();
+      ros::Time stamp = ros::Time::now();
+      img.header.stamp = stamp;
+      cam_info.header.stamp = stamp;
+      image_pub_.publish(img, cam_info);
+    }
 
-    image_pub_.publish(cv_image.toImageMsg());
-
+    /*
     if (got_camera_info_ && undistorted_image_pub_.getNumSubscribers() > 0)
     {
       cv_bridge::CvImage cv_image2;
@@ -181,6 +193,7 @@ void Renderer::eventsCallback(const dvs_msgs::EventArray::ConstPtr& msg)
       cv::undistort(cv_image.image, cv_image2.image, camera_matrix_, dist_coeffs_);
       undistorted_image_pub_.publish(cv_image2.toImageMsg());
     }
+    */
   }
 }
 
