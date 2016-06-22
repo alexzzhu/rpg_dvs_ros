@@ -40,7 +40,6 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   // load parameters
   //std::string dvs_serial_number;
   nh_private.param<std::string>("serial_number", dvs_serial_number, "");
-  std::cout << dvs_serial_number << std::endl;
   bool master;
   nh_private.param<bool>("master", master, true);
   double reset_timestamps_delay;
