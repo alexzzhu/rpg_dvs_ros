@@ -9,6 +9,7 @@
       <remap from="image_raw" to="left/image_raw"/>
       <remap from="dvs/events" to="dvs/left/events"/>
       <remap from="dvs/camera_info" to="dvs/left/camera_info"/>
+      <remap from ="imu" to="left/imu"/>
       <rosparam command="load" file="$(find davis_ros_driver)/config/standard.yaml" />
   </node>
   
@@ -19,8 +20,9 @@
         <remap from="image_raw" to="right/image_raw"/>
         <remap from="dvs/events" to="dvs/right/events"/>
         <remap from="dvs/camera_info" to="dvs/right/camera_info"/>
-      <!-- Wait until both nodes are running before resetting timestamps -->
-      <param name="reset_timestamps_delay" type="double" value="2.0" />
+	<remap from ="imu" to="right/imu"/>
+	<!-- Wait until both nodes are running before resetting timestamps -->
+	<param name="reset_timestamps_delay" type="double" value="2.0" />
 
   </node>
 
