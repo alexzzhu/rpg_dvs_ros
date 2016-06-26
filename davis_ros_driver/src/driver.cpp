@@ -154,7 +154,7 @@ void DavisRosDriver::caerConnect()
   
   // initialize timestamps
   resetTimestamps();
-  reset_time_ = ros::Time::now();
+
 
   // spawn threads
   running_ = true;
@@ -172,6 +172,7 @@ void DavisRosDriver::resetTimestamps()
 {
   ROS_INFO("Reset timestamps on %s", device_id_.c_str());
   caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_MUX, DAVIS_CONFIG_MUX_TIMESTAMP_RESET, 1);
+  reset_time_ = ros::Time::now();
 }
 
 void DavisRosDriver::resetTimestampsCallback(const std_msgs::Empty::ConstPtr& msg)
