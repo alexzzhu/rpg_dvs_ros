@@ -60,7 +60,7 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   // set namespace
   ns = ros::this_node::getNamespace();
   if (ns == "/")
-    ns = "/dvs";
+    ns = "/davis";
 
   event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>("dvs/events", 10);
   camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("dvs/camera_info", 1);
