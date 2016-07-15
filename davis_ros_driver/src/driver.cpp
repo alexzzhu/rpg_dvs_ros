@@ -65,14 +65,17 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>("dvs/events", 10);
   camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("dvs/camera_info", 1);
   imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu", 10);
+  reset_time_pub_ = nh.advertise<std_msgs::Time>("reset_time", 1, true);
   //image_pub_ = nh_.advertise<sensor_msgs::Image>(ns + "/image_raw", 1);
   cam_pub = it.advertiseCamera("image_raw", 1);
+  
 
   caerConnect();
   current_config_.streaming_rate = 30;
   delta_ = boost::posix_time::microseconds(1e6/current_config_.streaming_rate);
 
   reset_sub_ = nh_.subscribe("reset_timestamps", 1, &DavisRosDriver::resetTimestampsCallback, this);
+  reset_time_sub_ = nh.subscribe("reset_time", 1, &DavisRosDriver::resetTimeCallback, this);
   imu_calibration_sub_ = nh_.subscribe("calibrate_imu", 1, &DavisRosDriver::imuCalibrationCallback, this);
   snapshot_sub_ = nh_.subscribe("trigger_snapshot", 1, &DavisRosDriver::snapshotCallback, this);
 
@@ -172,11 +175,21 @@ void DavisRosDriver::resetTimestamps()
 {
   ROS_INFO("Reset timestamps on %s", device_id_.c_str());
   caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_MUX, DAVIS_CONFIG_MUX_TIMESTAMP_RESET, 1);
+  reset_time_ = ros::Time::now();
+  std_msgs::Time time = std_msgs::Time();
+  time.data = reset_time_;
+  reset_time_pub_.publish(time);
 }
-
+  
 void DavisRosDriver::resetTimestampsCallback(const std_msgs::Empty::ConstPtr& msg)
 {
   resetTimestamps();
+  reset_time_ = ros::Time::now();
+}
+  
+void DavisRosDriver::resetTimeCallback(const std_msgs::Time::ConstPtr& msg)
+{
+  reset_time_ = msg->data;
 }
 
 void DavisRosDriver::imuCalibrationCallback(const std_msgs::Empty::ConstPtr &msg)

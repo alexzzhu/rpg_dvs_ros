@@ -28,6 +28,7 @@
 #include <dvs_msgs/Event.h>
 #include <dvs_msgs/EventArray.h>
 #include <std_msgs/Empty.h>
+#include <std_msgs/Time.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Image.h>
 
@@ -65,6 +66,7 @@ private:
   image_transport::CameraPublisher cam_pub;
   ros::Publisher camera_info_pub_;
   ros::Publisher imu_pub_;
+  ros::Publisher reset_time_pub_;
   //ros::Publisher image_pub_;
   caerDeviceHandle davis_handle_;
 
@@ -80,6 +82,7 @@ private:
   void resetTimestampsCallback(const std_msgs::Empty::ConstPtr& msg);
 
   ros::Subscriber imu_calibration_sub_;
+  ros::Subscriber reset_time_sub_;
   void imuCalibrationCallback(const std_msgs::Empty::ConstPtr& msg);
   int imu_calibration_sample_size_;
   bool imu_calibration_running_;
@@ -111,6 +114,7 @@ private:
 
   ros::Timer timestamp_reset_timer_;
   void resetTimerCallback(const ros::TimerEvent& te);
+  void resetTimeCallback(const std_msgs::Time::ConstPtr& msg);
 
   bool parameter_update_required_;
   bool parameter_bias_update_required_;
