@@ -74,7 +74,8 @@ private:
   std::string ns;
 
   volatile bool running_;
-
+  volatile bool started_;
+  
   boost::shared_ptr<dynamic_reconfigure::Server<davis_ros_driver::DAVIS_ROS_DriverConfig> > server_;
   dynamic_reconfigure::Server<davis_ros_driver::DAVIS_ROS_DriverConfig>::CallbackType dynamic_reconfigure_callback_;
 

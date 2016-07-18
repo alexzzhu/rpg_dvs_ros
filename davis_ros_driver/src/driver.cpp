@@ -56,7 +56,6 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   bias.angular_velocity.y = 0.0;
   bias.angular_velocity.z = 0.0;
 
-
   // set namespace
   ns = ros::this_node::getNamespace();
   if (ns == "/")
@@ -68,8 +67,8 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   reset_time_pub_ = nh.advertise<std_msgs::Time>("reset_time", 1, true);
   //image_pub_ = nh_.advertise<sensor_msgs::Image>(ns + "/image_raw", 1);
   cam_pub = it.advertiseCamera("image_raw", 1);
-  
 
+  started_ = false;
   caerConnect();
   current_config_.streaming_rate = 30;
   delta_ = boost::posix_time::microseconds(1e6/current_config_.streaming_rate);
@@ -101,7 +100,7 @@ DavisRosDriver::~DavisRosDriver()
     parameter_thread_->join();
     readout_thread_->join();
     ROS_INFO("threads stopped");
-
+    
     caerDeviceClose(&davis_handle_);
   }
 }
@@ -176,9 +175,6 @@ void DavisRosDriver::resetTimestamps()
   ROS_INFO("Reset timestamps on %s", device_id_.c_str());
   caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_MUX, DAVIS_CONFIG_MUX_TIMESTAMP_RESET, 1);
   reset_time_ = ros::Time::now();
-  std_msgs::Time time = std_msgs::Time();
-  time.data = reset_time_;
-  reset_time_pub_.publish(time);
 }
   
 void DavisRosDriver::resetTimestampsCallback(const std_msgs::Empty::ConstPtr& msg)
@@ -190,6 +186,7 @@ void DavisRosDriver::resetTimestampsCallback(const std_msgs::Empty::ConstPtr& ms
 void DavisRosDriver::resetTimeCallback(const std_msgs::Time::ConstPtr& msg)
 {
   reset_time_ = msg->data;
+  started_ = true;
 }
 
 void DavisRosDriver::imuCalibrationCallback(const std_msgs::Empty::ConstPtr &msg)
@@ -250,7 +247,13 @@ void DavisRosDriver::snapshotCallback(const std_msgs::Empty::ConstPtr& msg)
 void DavisRosDriver::resetTimerCallback(const ros::TimerEvent& te)
 {
   resetTimestamps();
+  
   timestamp_reset_timer_.stop();
+
+  std_msgs::Time time = std_msgs::Time();
+  time.data = reset_time_;
+  reset_time_pub_.publish(time);
+
 }
 
 void DavisRosDriver::changeDvsParameters()
@@ -373,6 +376,10 @@ void DavisRosDriver::readout()
 
   while (running_)
   {
+    if (!started_)
+      {
+        continue;
+      }
     try
     {
       caerEventPacketContainer packetContainer = caerDeviceDataGet(davis_handle_);
