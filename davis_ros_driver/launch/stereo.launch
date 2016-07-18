@@ -3,7 +3,7 @@
   <!-- camera driver -->
   <node ns="davis/left" name="davis_ros_driver_left" pkg="davis_ros_driver" type="davis_ros_driver" output="screen">
       <!-- Serial number is on the back of the DVS -->
-      <param name="serial_number" type="str" value="8401000" />
+      <param name="serial_number" type="str" value="84010004" />
 
       <param name="cam_info_url" type="str" value="file://$(find davis_ros_driver)/config/DAVIS-84010004.yaml" />
       <remap from="reset_time" to="/davis/reset_time"/>
@@ -11,7 +11,7 @@
   </node>
   
   <node ns="davis/right" name="davis_ros_driver_right" pkg="davis_ros_driver" type="davis_ros_driver" output="screen">
-  	<param name="serial_number" type="str" value="8401005" />
+  	<param name="serial_number" type="str" value="84010050" />
         <rosparam command="load" file="$(find davis_ros_driver)/config/standard.yaml" />
         <param name="cam_info_url" type="str" value="file://$(find davis_ros_driver)/config/DAVIS-84010050.yaml" />
 	<!-- Wait until both nodes are running before resetting timestamps -->
