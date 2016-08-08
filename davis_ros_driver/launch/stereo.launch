@@ -19,6 +19,6 @@
         <remap from="reset_time" to="/davis/reset_time"/>
   </node>
 
-  <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" ns="davis" output="screen" required="true"/>
+  <!--node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" ns="davis" output="screen" required="true"/-->
 
 </launch>
