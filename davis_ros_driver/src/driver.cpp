@@ -61,7 +61,7 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   if (ns == "/")
     ns = "/davis";
 
-  event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>("dvs/events", 10);
+  event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>("dvs/events", 10000);
   camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("dvs/camera_info", 1);
   imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu", 10);
   reset_time_pub_ = nh.advertise<std_msgs::Time>("reset_time", 1, true);
@@ -250,8 +250,8 @@ void DavisRosDriver::resetTimerCallback(const ros::TimerEvent& te)
   
   timestamp_reset_timer_.stop();
 
-  std_msgs::Time time = std_msgs::Time();
-  time.data = reset_time_;
+  std_msgs::TimePtr time(new std_msgs::Time()); // = new std_msgs::Time();
+  //time->data = reset_time_;
   reset_time_pub_.publish(time);
 
 }
@@ -376,10 +376,6 @@ void DavisRosDriver::readout()
 
   while (running_)
   {
-    if (!started_)
-      {
-        continue;
-      }
     try
     {
       caerEventPacketContainer packetContainer = caerDeviceDataGet(davis_handle_);
@@ -424,7 +420,8 @@ void DavisRosDriver::readout()
               (current_config_.max_events != 0 && event_array_msg->events.size() > current_config_.max_events)
              )
           {
-            event_array_pub_.publish(event_array_msg);
+	    if (started_)
+	      event_array_pub_.publish(event_array_msg);
             event_array_msg->events.clear();
             if (current_config_.streaming_rate > 0)
               next_send_time += delta_;
@@ -436,7 +433,8 @@ void DavisRosDriver::readout()
           {
             sensor_msgs::CameraInfoPtr camera_info_msg(new sensor_msgs::CameraInfo(camera_info_manager_->getCameraInfo()));
             camera_info_msg->header.stamp = ros::Time::now();
-            camera_info_pub_.publish(camera_info_msg);
+	    if (started_)
+	      camera_info_pub_.publish(camera_info_msg);
           }
         }
         else if (i == IMU6_EVENT)
@@ -491,8 +489,8 @@ void DavisRosDriver::readout()
             msg.angular_velocity.x -= bias.angular_velocity.x;
             msg.angular_velocity.y -= bias.angular_velocity.y;
             msg.angular_velocity.z -= bias.angular_velocity.z;
-
-            imu_pub_.publish(msg);
+	    if (started_)
+	      imu_pub_.publish(msg);
           }
         }
 
@@ -532,7 +530,8 @@ void DavisRosDriver::readout()
           sensor_msgs::CameraInfoPtr camera_info_msg(new sensor_msgs::CameraInfo(camera_info_manager_->getCameraInfo()));
           camera_info_msg->header.stamp = stamp;//ros::Time::now();
           //image_pub_.publish(msg);
-          cam_pub.publish(msg, *camera_info_msg);
+	  if (started_)
+	    cam_pub.publish(msg, *camera_info_msg);
         }
       }
 

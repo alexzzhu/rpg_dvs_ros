@@ -2,7 +2,7 @@
 
 <launch>
   <!-- camera driver -->
-  <include file="$(find davis_ros_driver)/launch/mono.launch"/>
+  <!--include file="$(find davis_ros_driver)/launch/mono.launch"/-->
 
   <!-- visualization -->
   <node ns="davis" name="dvs_renderer" pkg="dvs_renderer" type="dvs_renderer">
