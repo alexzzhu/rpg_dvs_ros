@@ -363,7 +363,7 @@ void DavisRosDriver::callback(davis_ros_driver::DAVIS_ROS_DriverConfig &config, 
 void DavisRosDriver::readout()
 {
 
-  //std::vector<dvs::Event> events;
+  std::vector<dvs_msgs::Event> events;
 
   caerDeviceDataStart(davis_handle_, NULL, NULL, NULL, &DavisRosDriver::onDisconnectUSB, this);
   caerDeviceConfigSet(davis_handle_, CAER_HOST_CONFIG_DATAEXCHANGE, CAER_HOST_CONFIG_DATAEXCHANGE_BLOCKING, true);
@@ -410,19 +410,20 @@ void DavisRosDriver::readout()
             e.y = caerPolarityEventGetY(event);
             e.ts = reset_time_ + ros::Duration(caerPolarityEventGetTimestamp64(event, polarity) / 1.e6);
             e.polarity = caerPolarityEventGetPolarity(event);
-
-            event_array_msg->events.push_back(e);
+	    
+            events.push_back(e);
           }
 
           // throttle event messages
           if (boost::posix_time::microsec_clock::local_time() > next_send_time ||
               current_config_.streaming_rate == 0 ||
-              (current_config_.max_events != 0 && event_array_msg->events.size() > current_config_.max_events)
+              (current_config_.max_events != 0 && events.size() > current_config_.max_events)
              )
           {
 	    if (started_)
+	      event_array_msg->events = events;
 	      event_array_pub_.publish(event_array_msg);
-            event_array_msg->events.clear();
+            events.clear();
             if (current_config_.streaming_rate > 0)
               next_send_time += delta_;
             if (current_config_.max_events != 0 && event_array_msg->events.size() > current_config_.max_events)
