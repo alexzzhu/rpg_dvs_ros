@@ -400,17 +400,21 @@ void DavisRosDriver::readout()
           caerPolarityEventPacket polarity = (caerPolarityEventPacket) packetHeader;
 
           const int numEvents = caerEventPacketHeaderGetEventNumber(packetHeader);
+	  dvs_msgs::Event e;
           for (int j = 0; j < numEvents; j++)
           {
             // Get full timestamp and addresses of first event.
             caerPolarityEvent event = caerPolarityEventPacketGetEvent(polarity, j);
 
-            dvs_msgs::Event e;
+
             e.x = caerPolarityEventGetX(event);
             e.y = caerPolarityEventGetY(event);
             e.ts = reset_time_ + ros::Duration(caerPolarityEventGetTimestamp64(event, polarity) / 1.e6);
             e.polarity = caerPolarityEventGetPolarity(event);
 	    
+	    // Dead pixel on 50
+	    if (e.x==22 && e.y == 104)
+	      continue;
             events.push_back(e);
           }
 
@@ -420,9 +424,15 @@ void DavisRosDriver::readout()
               (current_config_.max_events != 0 && events.size() > current_config_.max_events)
              )
           {
-	    if (started_)
+	    if (started_) {
+	      dvs_msgs::EventArrayPtr event_array_msg(new dvs_msgs::EventArray());
+
+	      event_array_msg->height = davis_info_.dvsSizeY;
+	      event_array_msg->width = davis_info_.dvsSizeX;
+
 	      event_array_msg->events = events;
 	      event_array_pub_.publish(event_array_msg);
+	    }
             events.clear();
             if (current_config_.streaming_rate > 0)
               next_send_time += delta_;
