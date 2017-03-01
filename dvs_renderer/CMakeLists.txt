@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 # since we need eigen and boost search them as well
 # find_package makes the ${..._INCLUDE_DIRS} ${..._LIBRARIES} variables we use later
-find_package(OpenCV 2 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 # export the dependencis of this package for who ever depends on us
 catkin_package(

@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 # since we need boost search it as well
 # find_package makes the ${..._INCLUDE_DIRS} ${..._LIBRARIES} variables we use later
-find_package(OpenCV 2 REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 
 # export the dependencis of this package for who ever depends on us
@@ -53,6 +53,7 @@ add_executable(mono
   src/dvs_calibration.cpp
   src/board_detection.cpp
   src/transition_map.cpp
+  src/circlesgrid.cpp
 )
 
 # to build the executable we depend on other packets,
@@ -76,6 +77,7 @@ add_executable(stereo
   src/dvs_calibration.cpp
   src/board_detection.cpp
   src/transition_map.cpp
+  src/circlesgrid.cpp
 )
 
 # to build the executable we depend on other packets,
@@ -99,6 +101,7 @@ add_executable(camera_dvs
   src/dvs_calibration.cpp
   src/board_detection.cpp
   src/transition_map.cpp
+  src/circlesgrid.cpp
 )
 
 # to build the executable we depend on other packets,

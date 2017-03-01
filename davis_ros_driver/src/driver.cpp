@@ -172,9 +172,9 @@ void DavisRosDriver::onDisconnectUSB(void* driver){
 
 void DavisRosDriver::resetTimestamps()
 {
-  ROS_INFO("Reset timestamps on %s", device_id_.c_str());
   caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_MUX, DAVIS_CONFIG_MUX_TIMESTAMP_RESET, 1);
   reset_time_ = ros::Time::now();
+  ROS_INFO("Reset timestamps on %s, reset time is: %f", device_id_.c_str(), reset_time_.toSec());
 }
   
 void DavisRosDriver::resetTimestampsCallback(const std_msgs::Empty::ConstPtr& msg)
@@ -251,7 +251,7 @@ void DavisRosDriver::resetTimerCallback(const ros::TimerEvent& te)
   timestamp_reset_timer_.stop();
 
   std_msgs::TimePtr time(new std_msgs::Time()); // = new std_msgs::Time();
-  //time->data = reset_time_;
+  time->data = reset_time_;
   reset_time_pub_.publish(time);
 
 }
@@ -541,6 +541,8 @@ void DavisRosDriver::readout()
           }
 
           ros::Time stamp = reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
+
+          printf("Stamp is: %f, reset time is: %f\n", stamp.toSec(), reset_time_.toSec());
           
           // time
           msg.header.stamp = stamp;//reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
