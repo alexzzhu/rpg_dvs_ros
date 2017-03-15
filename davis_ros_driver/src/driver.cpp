@@ -654,8 +654,6 @@ void DavisRosDriver::readout()
 
           ros::Time stamp = reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
 
-          printf("Stamp is: %f, reset time is: %f\n", stamp.toSec(), reset_time_.toSec());
-          
           // time
           msg.header.stamp = stamp;//reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
           sensor_msgs::CameraInfoPtr camera_info_msg(new sensor_msgs::CameraInfo(camera_info_manager_->getCameraInfo()));
