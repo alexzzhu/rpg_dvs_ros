@@ -7,6 +7,7 @@
   <license>GNU GPL</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
   <build_depend>libcaer_catkin</build_depend>
@@ -16,7 +17,8 @@
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>camera_info_manager</build_depend>
   <build_depend>nodelet</build_depend>
-
+  <build_depend>image_transport</build_depend>
+  
   <run_depend>roscpp</run_depend>
   <run_depend>libcaer_catkin</run_depend>
   <run_depend>dvs_msgs</run_depend>
@@ -25,7 +27,8 @@
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>nodelet</run_depend>
-
+  <run_depend>image_transport</run_depend>
+  
   <export>
     <nodelet plugin="${prefix}/davis_ros_driver_nodelet.xml"/>
   </export>
