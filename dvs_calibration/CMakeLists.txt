@@ -53,7 +53,7 @@ add_executable(mono
   src/dvs_calibration.cpp
   src/board_detection.cpp
   src/transition_map.cpp
-  src/circlesgrid.cpp
+  #src/circlesgrid.cpp
 )
 
 # to build the executable we depend on other packets,
@@ -77,7 +77,7 @@ add_executable(stereo
   src/dvs_calibration.cpp
   src/board_detection.cpp
   src/transition_map.cpp
-  src/circlesgrid.cpp
+  #src/circlesgrid.cpp
 )
 
 # to build the executable we depend on other packets,
@@ -101,7 +101,7 @@ add_executable(camera_dvs
   src/dvs_calibration.cpp
   src/board_detection.cpp
   src/transition_map.cpp
-  src/circlesgrid.cpp
+  #src/circlesgrid.cpp
 )
 
 # to build the executable we depend on other packets,
