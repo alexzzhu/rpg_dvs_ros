@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(davis_ros_driver)
 
-
 ## search for everything we need to build the package
 find_package(catkin REQUIRED COMPONENTS
   roscpp
