@@ -3,17 +3,17 @@ project(davis_ros_driver)
 
 
 ## search for everything we need to build the package
-#find_package(catkin REQUIRED COMPONENTS
-#  roscpp
-#  libcaer_catkin
-#  dvs_msgs
-#  std_msgs
-#  sensor_msgs
-#  dynamic_reconfigure
-#  camera_info_manager
-#  nodelet
-#  image_transport
-#)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  libcaer_catkin
+  dvs_msgs
+  std_msgs
+  sensor_msgs
+  dynamic_reconfigure
+  camera_info_manager
+  nodelet
+  image_transport
+)
 
 find_package(catkin_simple REQUIRED)
 
