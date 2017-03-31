@@ -512,9 +512,9 @@ void DavisRosDriver::readout()
             e.ts = reset_time_ + ros::Duration(caerPolarityEventGetTimestamp64(event, polarity) / 1.e6);
             e.polarity = caerPolarityEventGetPolarity(event);
 	    
-	    // Dead pixel on 50
+	    /*// Dead pixel on 50
 	    if (e.x==22 && e.y == 104)
-	      continue;
+	    continue;*/
             events.push_back(e);
           }
 
