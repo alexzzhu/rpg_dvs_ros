@@ -68,8 +68,8 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   if (ns == "/")
     ns = "/davis";
 
-  event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>("dvs/events", 10000);
-  camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("dvs/camera_info", 1);
+  event_array_pub_ = nh_.advertise<dvs_msgs::EventArray>("events", 10000);
+  camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info", 1);
   imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu", 10);
   reset_time_pub_ = nh.advertise<std_msgs::Time>("reset_time", 1, true);
   //image_pub_ = nh_.advertise<sensor_msgs::Image>(ns + "/image_raw", 1);
