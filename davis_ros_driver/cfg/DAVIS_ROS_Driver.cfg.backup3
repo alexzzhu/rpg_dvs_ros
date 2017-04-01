@@ -12,7 +12,7 @@ gen.add("aps_enabled", bool_t, 0, "enables APS", True)
 gen.add("dvs_enabled", bool_t, 0, "enables DVS", True)
 gen.add("imu_enabled", bool_t, 0, "enables IMU", True)
 
-gen.add("exposure", int_t, 0, "exposure (frame exposure time in microseconds)", 50000, 0, 1000000)
+gen.add("exposure", int_t, 0, "exposure (frame exposure time in microseconds)", 5000, 0, 1000000)
 gen.add("frame_delay", int_t, 0, "frame_delay (delay between consecutive frames in microseconds)", 0, 0, 1000000)
 
 # DAVIS Biasing
@@ -33,13 +33,13 @@ grp_stage_one = gen.add_group("DAVIS_Biases_Stage_1")
 addBias(grp_stage_one, "PrBp",
 	"Amplifier in first stage. Limits the speed. Higher=faster and more noise", 2, 58) #4, 44)#2, 58
 addBias(grp_stage_one, "PrSFBp",
-	"Source follower: set high to allow higher pixel bandwidth (has no influence if set high enough)", 1, 16)
+	"Source follower: set high to allow higher pixel bandwidth (has no influence if set high enough)", 6, 33)
 
 grp_stage_two = gen.add_group("DAVIS_Biases_Stage_2")
 addBias(grp_stage_two, "DiffBn",
 	"Amplifier of second stage. Indep of actual illumination level. rebalance ONBn/OFFBn after changing this", 4, 39)
 addBias(grp_stage_two, "ONBn",
-	"Threshold for ON events (contrast sensitivity). Must be >DiffBn.", 6, 255)
+	"Threshold for ON events (contrast sensitivity). Must be >DiffBn.", 6, 200)
 addBias(grp_stage_two, "OFFBn",
 	"Threshold for OFF events (contrast sensitivity). Must be <DiffBn.", 4, 0)
 addBias(grp_stage_two, "RefrBp",
