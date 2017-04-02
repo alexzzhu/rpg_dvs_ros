@@ -18,15 +18,11 @@
 int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "dvs_renderer");
-  printf("Here?\n");
+
   ros::NodeHandle nh;
   ros::NodeHandle nh_private("~");
 
-  printf("Starting\n");
-
   dvs_renderer::Renderer renderer(nh, nh_private);
-
-  printf("Created\n");
 
   ros::spin();
 

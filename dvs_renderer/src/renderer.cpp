@@ -28,8 +28,6 @@ Renderer::Renderer(ros::NodeHandle & nh, ros::NodeHandle nh_private) : nh_(nh)
   nh_private.param<std::string>("display_method", display_method_str, "");
   display_method_ = (display_method_str == std::string("grayscale")) ? GRAYSCALE : RED_BLUE;
 
-  printf("Started\n");
-
   // setup subscribers and publishers
   event_sub_ = nh_.subscribe("events", 1, &Renderer::eventsCallback, this);
   camera_info_sub_ = nh_.subscribe("camera_info", 1, &Renderer::cameraInfoCallback, this);
@@ -39,8 +37,6 @@ Renderer::Renderer(ros::NodeHandle & nh, ros::NodeHandle nh_private) : nh_(nh)
   //image_pub_ = it_.advertise("dvs_rendering", 1);
   image_pub_ = it_.advertise("dvs_rendering", 1);
   //undistorted_image_pub_ = it_.advertise("dvs_undistorted", 1);
-
-  printf("Subscribe etc\n");
 
   for (int i = 0; i < 2; ++i)
     for (int k = 0; k < 2; ++k)
@@ -53,7 +49,6 @@ Renderer::Renderer(ros::NodeHandle & nh, ros::NodeHandle nh_private) : nh_(nh)
   event_stats_[1].events_mean_lasttime_ = 0;
   event_stats_[1].events_mean_[0] = nh_.advertise<std_msgs::Float32>("events_on_mean_5", 1);
   event_stats_[1].events_mean_[1] = nh_.advertise<std_msgs::Float32>("events_off_mean_5", 1);
-  printf("What is this\n");
 }
 
 Renderer::~Renderer()
@@ -94,26 +89,14 @@ void Renderer::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
 
 
   cv::Mat image_gray = cv_ptr->image;
-  printf("Image has %d rows, %d cols\n", cv_ptr->image.rows, cv_ptr->image.cols);
-  std::cout << cv_ptr->image << std::endl;
-  try
-    {
-      printf("Converting\n");
-      // convert from grayscale to color image
-      cv::cvtColor(cv_ptr->image, last_image_, cv::COLOR_GRAY2BGR);
-    }
-  catch (...)
-    {
-      printf("Image empty?\n");
-      std::cout << cv_ptr->image << std::endl;
-    }
-
+  // convert from grayscale to color image
+  cv::cvtColor(cv_ptr->image, last_image_, cv::COLOR_GRAY2BGR);
+  
   if (!used_last_image_)
   {
     cv_bridge::CvImage cv_image;
     last_image_.copyTo(cv_image.image);
     cv_image.encoding = "bgr8";
-    std::cout << "publish image from callback" << std::endl;
     //if (got_camera_info_){
     sensor_msgs::Image img = *cv_image.toImageMsg();
     ros::Time stamp = ros::Time::now();
@@ -127,7 +110,6 @@ void Renderer::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
 
 void Renderer::eventsCallback(const dvs_msgs::EventArray::ConstPtr& msg)
 {
-  printf("Events callback\n");
   for (int i = 0; i < msg->events.size(); ++i)
   {
     ++event_stats_[0].events_counter_[msg->events[i].polarity];
@@ -136,7 +118,6 @@ void Renderer::eventsCallback(const dvs_msgs::EventArray::ConstPtr& msg)
 
   publishStats();
   //image_tracking_.eventsCallback(msg);
-  printf("Published states\n");
   // only create image if at least one subscriber
   if (image_pub_.getNumSubscribers() > 0)
   {
@@ -214,7 +195,6 @@ void Renderer::eventsCallback(const dvs_msgs::EventArray::ConstPtr& msg)
     }
     */
   }
-  printf("Events done\n");
 }
 
 void Renderer::publishStats()

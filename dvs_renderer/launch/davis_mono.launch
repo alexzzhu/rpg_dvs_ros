@@ -5,7 +5,7 @@
   <!--include file="$(find davis_ros_driver)/launch/mono.launch"/-->
 
   <!-- visualization -->
-  <node ns="davis" name="dvs_renderer" pkg="dvs_renderer" type="dvs_renderer" output="screen" launch-prefix="gdb -ex run --args">
+  <node ns="davis" name="dvs_renderer" pkg="dvs_renderer" type="dvs_renderer" output="screen">
     <!-- <param name="display_method" value="grayscale"/> -->
     <param name="display_method" value="red-blue"/>
     <remap from="events" to="events" />
