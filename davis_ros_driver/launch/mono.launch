@@ -5,7 +5,7 @@
   <node ns="davis" name="davis_ros_driver" pkg="davis_ros_driver" type="davis_ros_driver" output="screen">
       <!-- Serial number is on the back of the DVS -->
       <!--param name="serial_number" type="str" value="84010050" /-->
-      <param name="cam_info_url" type="str" value="file://$(find davis_ros_driver)/config/DAVIS-346-00005.yaml" />
+      <param name="cam_info_url" type="str" value="file://$(find davis_ros_driver)/config/DAVIS-346-00005_4mm.yaml" />
       <remap from="reset_time" to="/davis/reset_time"/>
       <param name="reset_timestamps_delay" type="double" value="2.0" />
       <rosparam command="load" file="$(find davis_ros_driver)/config/standard.yaml" />
