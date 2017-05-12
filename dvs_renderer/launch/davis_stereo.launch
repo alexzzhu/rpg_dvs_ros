@@ -2,7 +2,7 @@
 
 <launch>  
   <!-- DVS drivers -->
-  <include file="$(find davis_ros_driver)/launch/stereo.launch" />
+  <!--include file="$(find davis_ros_driver)/launch/stereo.launch" /-->
 
   <!-- visualization -->
   <node ns="davis/left" name="davis_renderer_left" pkg="dvs_renderer" type="dvs_renderer">
