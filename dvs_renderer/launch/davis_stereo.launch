@@ -9,7 +9,7 @@
     <param name="display_method" value="red-blue"/>
     <remap from="image" to="image_raw"/>
     <remap from="events" to="events"/>
-    <remap from="dvs_rendering" to="/davis/dvs/rendering/left/image_raw" />
+    <remap from="dvs_rendering" to="/davis/rendering/left/image_raw" />
     <remap from="camera_info" to="camera_info"/>
   </node>
   
@@ -17,19 +17,20 @@
     <param name="display_method" value="red-blue"/>
     <remap from="image" to="image_raw"/>
     <remap from="events" to="events" />
-    <remap from="dvs_rendering" to="/davis/dvs/rendering/right/image_raw" />
+    <remap from="dvs_rendering" to="/davis/rendering/right/image_raw" />
     <remap from="camera_info" to="camera_info"/>
   </node>
+
   
-  <node pkg="stereo_image_proc" type="stereo_image_proc" name="dvs_stereo_image_proc" ns="davis/dvs/rendering" output="screen" required="true"/>
+  <!--node pkg="stereo_image_proc" type="stereo_image_proc" name="dvs_stereo_image_proc" ns="davis/rendering" output="screen" required="true"/-->
   
   <!-- display -->
   <node name="image_view_left" pkg="image_view" type="image_view">
-  	<remap from="image" to="/davis/dvs/rendering/left/image_rect_color"/>
+  	<remap from="image" to="/davis/rendering/left/image_raw"/>
   </node>
   
   <node name="image_view_right" pkg="image_view" type="image_view">
-  	<remap from="image" to="/davis/dvs/rendering/right/image_rect_color"/>
+  	<remap from="image" to="/davis/rendering/right/image_raw"/>
   </node>
   
 </launch>
