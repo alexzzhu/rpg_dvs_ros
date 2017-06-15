@@ -123,25 +123,16 @@ void DavisRosDriver::caerConnect()
     // OLD 
     //    davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX2, 0, 0, (char*)dvs_serial_number.c_str());
 
-    davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX2, 0, 0, NULL);
+    davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX3, 0, 0, NULL);
 
     //dvs_running = driver_->isDeviceRunning();
     dvs_running = !(davis_handle_ == NULL);
 
     if (!dvs_running)
     {
-      davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX3, 0, 0, NULL);
-
-      //dvs_running = driver_->isDeviceRunning();
-      dvs_running = !(davis_handle_ == NULL);
-
-      if (!dvs_running)
-      {
-        
-        ROS_WARN("Could not find DVS. Will retry every second.");
-        ros::Duration(1.0).sleep();
-        ros::spinOnce();
-      }
+      ROS_WARN("Could not find DVS. Will retry every second.");
+      ros::Duration(1.0).sleep();
+      ros::spinOnce();
     }
 
     if (!ros::ok())
@@ -161,31 +152,20 @@ void DavisRosDriver::caerConnect()
     device_id_ = "DAVIS-" + std::string(davis_info_.deviceString).substr(18, 8);
   }
 
-  ROS_INFO("%s --- ID: %d, Master: %d, DVS X: %d, DVS Y: %d, Logic: %d.\n",
-           davis_info_.deviceString,
-           davis_info_.deviceID,
-           davis_info_.deviceIsMaster,
-           davis_info_.dvsSizeX,
-           davis_info_.dvsSizeY,
-           davis_info_.logicVersion);
+  ROS_INFO("%s --- ID: %d, Master: %d, DVS X: %d, DVS Y: %d, Logic: %d.\n", davis_info_.deviceString,
+          davis_info_.deviceID, davis_info_.deviceIsMaster, davis_info_.dvsSizeX, davis_info_.dvsSizeY,
+          davis_info_.logicVersion);
 
   // Send the default configuration before using the device.
   // No configuration is sent automatically!
   caerDeviceSendDefaultConfig(davis_handle_);
-
   /*
    * Something with the default aps size is wrong with the DAVIS346B. Quickfix with sending hardcoded values
    */
   if (davis_info_.chipID == DAVIS_CHIP_DAVIS346B)
   {
-    caerDeviceConfigSet(davis_handle_,
-                        DAVIS_CONFIG_APS,
-                        DAVIS_CONFIG_APS_END_COLUMN_0,
-                        U16T(davis_info_.apsSizeX-1));
-    caerDeviceConfigSet(davis_handle_,
-                        DAVIS_CONFIG_APS,
-                        DAVIS_CONFIG_APS_END_ROW_0,
-                        U16T(davis_info_.apsSizeY-1));
+    caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_APS, DAVIS_CONFIG_APS_END_COLUMN_0, U16T(davis_info_.apsSizeX-1));
+    caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_APS, DAVIS_CONFIG_APS_END_ROW_0, U16T(davis_info_.apsSizeY-1));
   }
 
   // Re-send params from param server if not first connection
@@ -194,21 +174,22 @@ void DavisRosDriver::caerConnect()
 
   // camera info handling
   ros::NodeHandle nh_ns(ns);
-  camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(nh_ns, device_id_));
+  if (camera_info_manager_)
+  {
+    delete camera_info_manager_;
+  }
+
+  camera_info_manager_ = new camera_info_manager::CameraInfoManager(nh_ns, device_id_, cam_info_url);
   
   // initialize timestamps
   resetTimestamps();
+
 
   // spawn threads
   running_ = true;
   parameter_thread_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DavisRosDriver::changeDvsParameters, this)));
   readout_thread_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DavisRosDriver::readout, this)));
 
-  // wait for driver to be ready
-  ros::Duration(0.5).sleep();
-
-  // initialize timestamps
-  resetTimestamps();
 }
 
 void DavisRosDriver::onDisconnectUSB(void* driver)
@@ -347,25 +328,19 @@ void DavisRosDriver::changeDvsParameters()
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_PADFOLLBN,
             caerBiasCoarseFineGenerate(CF_N_TYPE(7, 215)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_DIFFBN,
-                            caerBiasCoarseFineGenerate(CF_N_TYPE(current_config_.DiffBn_coarse, current_config_.DiffBn_fine)));
-        //caerBiasCoarseFineGenerate(CF_N_TYPE(3, 39)));
+            caerBiasCoarseFineGenerate(CF_N_TYPE(4, 39)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_ONBN,
-                            caerBiasCoarseFineGenerate(CF_N_TYPE(current_config_.ONBn_coarse, current_config_.ONBn_fine)));
-        //caerBiasCoarseFineGenerate(CF_N_TYPE(2, 255)));
+            caerBiasCoarseFineGenerate(CF_N_TYPE(6, 255)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_OFFBN,
-                            caerBiasCoarseFineGenerate(CF_N_TYPE(current_config_.OFFBn_coarse, current_config_.OFFBn_fine)));
-        //caerBiasCoarseFineGenerate(CF_N_TYPE(3, 0)));
+            caerBiasCoarseFineGenerate(CF_N_TYPE(4, 0)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_PIXINVBN,
             caerBiasCoarseFineGenerate(CF_N_TYPE(5, 129)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_PRBP,
-                            caerBiasCoarseFineGenerate(CF_P_TYPE(current_config_.PrBp_coarse, current_config_.PrBp_fine)));
-        //caerBiasCoarseFineGenerate(CF_P_TYPE(5, 58)));
+            caerBiasCoarseFineGenerate(CF_P_TYPE(2, 255)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_PRSFBP,
-                            caerBiasCoarseFineGenerate(CF_P_TYPE(current_config_.PrSFBp_coarse, current_config_.PrSFBp_fine)));
-        //caerBiasCoarseFineGenerate(CF_P_TYPE(6, 16)));
+            caerBiasCoarseFineGenerate(CF_P_TYPE(1, 199)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_REFRBP,
-                            caerBiasCoarseFineGenerate(CF_P_TYPE(current_config_.RefrBp_coarse, current_config_.RefrBp_fine)));
-        //caerBiasCoarseFineGenerate(CF_P_TYPE(3, 25)));
+            caerBiasCoarseFineGenerate(CF_P_TYPE(3, 7)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_READOUTBUFBP,
             caerBiasCoarseFineGenerate(CF_P_TYPE(6, 20)));
         caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS346_CONFIG_BIAS_APSROSFBN,
@@ -403,7 +378,7 @@ void DavisRosDriver::changeDvsParameters()
         {
           parameter_bias_update_required_ = false;
           caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS240_CONFIG_BIAS_PRBP,
-                              caerBiasCoarseFineGenerate(CF_P_TYPE(current_config_.PrBp_coarse, current_config_.PrBp_fine)));
+              caerBiasCoarseFineGenerate(CF_P_TYPE(current_config_.PrBp_coarse, current_config_.PrBp_fine)));
           caerDeviceConfigSet(davis_handle_, DAVIS_CONFIG_BIAS, DAVIS240_CONFIG_BIAS_PRSFBP,
               caerBiasCoarseFineGenerate(CF_P_TYPE(current_config_.PrSFBp_coarse, current_config_.PrSFBp_fine)));
 

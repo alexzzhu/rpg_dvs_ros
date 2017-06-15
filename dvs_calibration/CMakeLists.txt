@@ -3,14 +3,12 @@ project(dvs_calibration)
 
 find_package(catkin_simple REQUIRED)
 
-
 # since we need boost search it as well
 # find_package makes the ${..._INCLUDE_DIRS} ${..._LIBRARIES} variables we use later
 #find_package(OpenCV REQUIRED)
 #find_package(Boost REQUIRED)
 
 catkin_simple()
-
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
 
