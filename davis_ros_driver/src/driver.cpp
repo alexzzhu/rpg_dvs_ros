@@ -181,12 +181,16 @@ void DavisRosDriver::caerConnect()
   // initialize timestamps
   resetTimestamps();
 
-
   // spawn threads
   running_ = true;
   parameter_thread_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DavisRosDriver::changeDvsParameters, this)));
   readout_thread_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DavisRosDriver::readout, this)));
 
+  // wait for driver to be ready
+  ros::Duration(0.5).sleep();
+
+  // initialize timestamps
+  resetTimestamps();
 }
 
 void DavisRosDriver::onDisconnectUSB(void* driver)
