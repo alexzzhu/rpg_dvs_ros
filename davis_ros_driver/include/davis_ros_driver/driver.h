@@ -107,7 +107,8 @@ private:
 
   struct caer_davis_info davis_info_;
   std::string device_id_;
-  std::string dvs_serial_number;
+  uint16_t device_type_;
+  std::string dvs_serial_number_;
 
   ros::Time reset_time_;
 

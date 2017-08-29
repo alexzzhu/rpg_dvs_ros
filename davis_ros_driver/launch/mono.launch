@@ -8,6 +8,7 @@
       <param name="cam_info_url" type="str" value="file://$(find davis_ros_driver)/config/DAVIS-346-00005_4mm.yaml" />
       <remap from="reset_time" to="/davis/reset_time"/>
       <param name="reset_timestamps_delay" type="double" value="2.0" />
+      <param name="model" type="str" value="DAVIS_FX3" />
       <rosparam command="load" file="$(find davis_ros_driver)/config/standard.yaml" />
   </node>
 </launch>

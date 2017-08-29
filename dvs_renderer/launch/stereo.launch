@@ -5,13 +5,13 @@
   <!-- visualization -->
   <node name="dvs_renderer_left" pkg="dvs_renderer" type="dvs_renderer">
     <param name="display_method" value="red-blue"/>
-    <remap from="events" to="/dvs_left/events" />
+    <remap from="events" to="/dvs/left/events" />
     <remap from="dvs_rendering" to="dvs_rendering_left" />
   </node>
   
   <node name="dvs_renderer_right" pkg="dvs_renderer" type="dvs_renderer">
     <param name="display_method" value="red-blue"/>
-    <remap from="events" to="/dvs_right/events" />
+    <remap from="events" to="/dvs/right/events" />
     <remap from="dvs_rendering" to="dvs_rendering_right" />
   </node>
   

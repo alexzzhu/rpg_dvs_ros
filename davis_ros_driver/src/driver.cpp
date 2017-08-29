@@ -46,7 +46,7 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
 
   // load parameters
   //std::string dvs_serial_number;
-  nh_private.param<std::string>("serial_number", dvs_serial_number, "");
+  nh_private.param<std::string>("serial_number", dvs_serial_number_, "");
   bool master;
   nh_private.param<bool>("master", master, true);
   double reset_timestamps_delay;
@@ -72,9 +72,23 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info", 1);
   imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu", 10);
   reset_time_pub_ = nh.advertise<std_msgs::Time>("reset_time", 1, true);
-  //image_pub_ = nh_.advertise<sensor_msgs::Image>(ns + "/image_raw", 1);
   cam_pub = it.advertiseCamera("image_raw", 1);
 
+  device_type_ = CAER_DEVICE_DAVIS_FX2;
+  std::string model = nh_private.param("model", std::string("DAVIS_FX2"));
+  if (model == "DAVIS_FX3")
+  {
+    device_type_ = CAER_DEVICE_DAVIS_FX3;
+
+    /*
+    // Ugly bias fix. Hardware bug?
+    bias.linear_acceleration.x = 0.59020;
+    bias.linear_acceleration.y = 0.25995;
+    bias.linear_acceleration.z = 2.97717;
+    */
+  }
+
+  
   started_ = false;
   caerConnect();
   current_config_.streaming_rate = 30;
@@ -94,7 +108,7 @@ DavisRosDriver::DavisRosDriver(ros::NodeHandle & nh, ros::NodeHandle nh_private)
   if (reset_timestamps_delay > 0.0)
   {
     timestamp_reset_timer_ = nh_.createTimer(ros::Duration(reset_timestamps_delay), &DavisRosDriver::resetTimerCallback, this);
-    ROS_INFO("Started timer to reset timestamps on master DVS for synchronization (delay=%3.2fs).", reset_timestamps_delay);
+    //ROS_INFO("Started timer to reset timestamps on master DVS for synchronization (delay=%3.2fs).", reset_timestamps_delay);
   }
 }
 
@@ -123,25 +137,16 @@ void DavisRosDriver::caerConnect()
     // OLD 
     //    davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX2, 0, 0, (char*)dvs_serial_number.c_str());
 
-    davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX2, 0, 0, NULL);
-
+    davis_handle_ = caerDeviceOpen(1, device_type_, 0, 0, (char*)dvs_serial_number_.c_str());
+    
     //dvs_running = driver_->isDeviceRunning();
     dvs_running = !(davis_handle_ == NULL);
 
     if (!dvs_running)
-    {
-      davis_handle_ = caerDeviceOpen(1, CAER_DEVICE_DAVIS_FX3, 0, 0, NULL);
-
-      //dvs_running = driver_->isDeviceRunning();
-      dvs_running = !(davis_handle_ == NULL);
-
-      if (!dvs_running)
-      {
-        
-        ROS_WARN("Could not find DVS. Will retry every second.");
-        ros::Duration(1.0).sleep();
-        ros::spinOnce();
-      }
+    {    
+      ROS_WARN("Could not find DVS. Will retry every second.");
+      ros::Duration(1.0).sleep();
+      ros::spinOnce();
     }
 
     if (!ros::ok())
@@ -194,7 +199,9 @@ void DavisRosDriver::caerConnect()
 
   // camera info handling
   ros::NodeHandle nh_ns(ns);
-  camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(nh_ns, device_id_));
+  camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(nh_ns,
+                                                                        device_id_,
+                                                                        cam_info_url));
   
   // initialize timestamps
   resetTimestamps();
@@ -683,7 +690,6 @@ void DavisRosDriver::readout()
           msg.header.stamp = stamp;//reset_time_ + ros::Duration(caerFrameEventGetTimestamp64(event, frame) / 1.e6);
           sensor_msgs::CameraInfoPtr camera_info_msg(new sensor_msgs::CameraInfo(camera_info_manager_->getCameraInfo()));
           camera_info_msg->header.stamp = stamp;//ros::Time::now();
-          //image_pub_.publish(msg);
 	  if (started_)
 	    cam_pub.publish(msg, *camera_info_msg);
         }
