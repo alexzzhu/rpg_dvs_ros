@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(davis_ros_driver)
 
-find_package(catkin_simple REQUIRED)
+find_package(catkin_simple REQUIRED
+  libcaer_catkin)
 
 catkin_simple()
 
