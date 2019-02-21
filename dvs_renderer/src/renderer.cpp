@@ -1,17 +1,4 @@
 // This file is part of DVS-ROS - the RPG DVS ROS Package
-//
-// DVS-ROS is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// DVS-ROS is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with DVS-ROS.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "dvs_renderer/renderer.h"
 #include <std_msgs/Float32.h>
@@ -78,7 +65,7 @@ void Renderer::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
 
   try
   {
-    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
+    cv_ptr = cv_bridge::toCvCopy(msg);
   }
   catch (cv_bridge::Exception& e)
   {
@@ -86,8 +73,9 @@ void Renderer::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
     return;
   }
 
-  // convert from grayscale to color image
-  cv::cvtColor(cv_ptr->image, last_image_, CV_GRAY2BGR);
+  // convert to BGR image
+  if (msg->encoding == "rgb8") cv::cvtColor(cv_ptr->image, last_image_, CV_RGB2BGR);
+  if (msg->encoding == "mono8") cv::cvtColor(cv_ptr->image, last_image_, CV_GRAY2BGR);
 
   if (!used_last_image_)
   {
@@ -147,8 +135,16 @@ void Renderer::eventsCallback(const dvs_msgs::EventArray::ConstPtr& msg)
     else
     {
       cv_image.encoding = "mono8";
-      cv_image.image = cv::Mat(msg->height, msg->width, CV_8U);
-      cv_image.image = cv::Scalar(128);
+      if (last_image_.rows == msg->height && last_image_.cols == msg->width)
+      {
+        cv::cvtColor(last_image_, cv_image.image, CV_BGR2GRAY);
+        used_last_image_ = true;
+      }
+      else
+      {
+        cv_image.image = cv::Mat(msg->height, msg->width, CV_8U);
+        cv_image.image = cv::Scalar(128);
+      }
 
       cv::Mat on_events = cv::Mat(msg->height, msg->width, CV_8U);
       on_events = cv::Scalar(0);
