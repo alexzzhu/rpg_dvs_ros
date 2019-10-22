@@ -4,8 +4,8 @@
   <!-- master DAVIS -->
   <node ns="davis" name="davis_ros_driver" pkg="davis_ros_driver" type="davis_ros_driver" output="screen">
     <!--param name="serial_number" type="str" value="00001007" /-->
-    <rosparam command="load" file="$(find davis_ros_driver)/config/DAVIS240C.yaml" />
-    <!--rosparam command="load" file="$(find davis_ros_driver)/config/miniDAVIS346.yaml" /-->
+    <!--rosparam command="load" file="$(find davis_ros_driver)/config/DAVIS240C.yaml" /-->
+    <rosparam command="load" file="$(find davis_ros_driver)/config/DAVIS346red.yaml" />
     <param name="master" value="True"/>
 
     <param name="enable_autoexposure" value="True"/>
